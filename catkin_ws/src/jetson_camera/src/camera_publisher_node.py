@@ -6,11 +6,12 @@ from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 
 class CameraPublisherNode:
-    def __init__(self, sensor_id = 0):
+    def __init__(self, node_name):
         self.initialized = False
         rospy.loginfo("Initializing camera publisher node...")
         # Initialize the ROS node
-        rospy.init_node('camera_publisher_node', anonymous=True)
+        self.node_name = node_name
+        rospy.init_node(self.node_name, anonymous=True)
 
         # Publisher for the image topic
         self.image_pub = rospy.Publisher('/camera/image_raw', Image, queue_size=10)
@@ -19,11 +20,13 @@ class CameraPublisherNode:
         self.bridge = CvBridge()
 
         # Camera Dimensions And Properties Parameters
-        self.sensor_id = sensor_id  # 0: CSI, 1: USB
-        self.width = 640
-        self.height = 480
-        self.fps = 30
-        self.flip_method = 0
+        config = self.load_yaml()
+
+        self.sensor_id = config["sensor_id"]  # 0: CSI, 1: USB
+        self.width = config["width"]
+        self.height = config["height"]
+        self.fps = config["fps"]
+        self.flip_method = config["flip_method"]
         
         # GStreamer pipeline for the Jetson CSI camera
         self.pipeline = self.gstreamer_pipeline()
@@ -89,12 +92,28 @@ class CameraPublisherNode:
     def cleanup(self):
         self.cap.release()
 
+    def load_yaml(self):
+        config = {}
+        node_name = '/' + self.node_name
+        config["sensor_id"] = rospy.get_param(node_name + "/sensor_id")
+        config["width"] = rospy.get_param(node_name + "/width")
+        config["height"] = rospy.get_param(node_name + "/height")
+        config["fps"] = rospy.get_param(node_name + "/fps")
+        config["flip_method"] = rospy.get_param(node_name + "/flip_method")
+
+        # Log the loaded configuration
+        rospy.loginfo("Loaded config: %s", config)
+
+        return config
+
 if __name__ == "__main__":
-    # Initialize the node
+    node_name = "camera_publisher_node"
+    camera_pub = None
     try:
-        camera_pub = CameraPublisherNode()
+        camera_pub = CameraPublisherNode(node_name)
         camera_pub.start_publishing()
     except rospy.ROSInterruptException:
         pass
     finally:
-        camera_pub.cleanup()
+        if camera_pub is not None:
+            camera_pub.cleanup()
