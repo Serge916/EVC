@@ -37,5 +37,5 @@ RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 ## ADD ANY CUSTOM SETUP BELOW ##
 ################################
 
-ARG ROS_MASTER_URI=http://192.168.55.1:11311
-ARG DISPLAY=0
+ENV ROS_MASTER_URI=http://192.168.8.2:11311
+ENV DISPLAY=0

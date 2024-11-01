@@ -1,0 +1,5 @@
+*
+!catkin_ws/src
+!.devcontainer
+!*README.md
+!testScripts
