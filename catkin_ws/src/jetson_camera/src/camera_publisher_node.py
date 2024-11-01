@@ -94,12 +94,11 @@ class CameraPublisherNode:
 
     def load_yaml(self):
         config = {}
-        node_name = '/' + self.node_name
-        config["sensor_id"] = rospy.get_param(node_name + "/sensor_id")
-        config["width"] = rospy.get_param(node_name + "/width")
-        config["height"] = rospy.get_param(node_name + "/height")
-        config["fps"] = rospy.get_param(node_name + "/fps")
-        config["flip_method"] = rospy.get_param(node_name + "/flip_method")
+        config["sensor_id"] = rospy.get_param("~sensor_id")
+        config["width"] = rospy.get_param("~width")
+        config["height"] = rospy.get_param("~height")
+        config["fps"] = rospy.get_param("~fps")
+        config["flip_method"] = rospy.get_param("~flip_method")
 
         # Log the loaded configuration
         rospy.loginfo("Loaded config: %s", config)

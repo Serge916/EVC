@@ -16,6 +16,10 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+)
+
 # Install Python scripts
 catkin_install_python(PROGRAMS
   src/camera_publisher_node.py
