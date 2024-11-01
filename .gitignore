@@ -1,5 +1,2 @@
-*
-!catkin_ws/src
-!.devcontainer
-!*README.md
-!testScripts
+catkin_ws/build
+catkin_ws/devel
