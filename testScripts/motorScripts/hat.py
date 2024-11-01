@@ -11,6 +11,7 @@ HIGH = 1
 PWM_LOW = 0
 PWM_HIGH = 4096
 
+
 class MotorDirection(IntEnum):
     RELEASE = 0
     FORWARD = 1
@@ -20,6 +21,7 @@ class MotorDirection(IntEnum):
 class MotorDirectionControl(IntEnum):
     PWM = 0
     GPIO = 1
+
 
 @dataclass
 class MotorPins:
@@ -62,7 +64,8 @@ class PWMMotorDirectionController(AbsMotorDirectionController):
         super().__init__(*args, **kwargs)
         if not isinstance(kwargs.get("pwm", None), PWM):
             raise ValueError(
-                "You cannot instantiate `PWMMotorDirectionController` " "without passing a `PWM` object."
+                "You cannot instantiate `PWMMotorDirectionController` "
+                "without passing a `PWM` object."
             )
         self._pwm = kwargs["pwm"]
 
@@ -71,7 +74,10 @@ class PWMMotorDirectionController(AbsMotorDirectionController):
 
     def set(self, direction: MotorDirection):
         in1_signal, in2_signal = self._DIRECTION_TO_SIGNALS[direction]
-        in1_value, in2_value = self._PWM_VALUES[in1_signal], self._PWM_VALUES[in2_signal]
+        in1_value, in2_value = (
+            self._PWM_VALUES[in1_signal],
+            self._PWM_VALUES[in2_signal],
+        )
         self._pwm.setPWM(self._in1_pin, *in1_value)
         self._pwm.setPWM(self._in2_pin, *in2_value)
 
@@ -91,7 +97,10 @@ class GPIOMotorDirectionController(AbsMotorDirectionController):
 
     def set(self, direction: MotorDirection):
         in1_signal, in2_signal = self._DIRECTION_TO_SIGNALS[direction]
-        in1_value, in2_value = self._GPIO_VALUES[in1_signal], self._GPIO_VALUES[in2_signal]
+        in1_value, in2_value = (
+            self._GPIO_VALUES[in1_signal],
+            self._GPIO_VALUES[in2_signal],
+        )
         GPIO.output(self._in1_pin, in1_value)
         GPIO.output(self._in2_pin, in2_value)
 
@@ -104,7 +113,13 @@ class Motor:
     }
 
     def __init__(
-        self, name: str, pwm: PWM, in1_pin: int, in2_pin: int, pwm_pin: int, control: MotorDirectionControl
+        self,
+        name: str,
+        pwm: PWM,
+        in1_pin: int,
+        in2_pin: int,
+        pwm_pin: int,
+        control: MotorDirectionControl,
     ):
         self._pwm = pwm
         self._name = name
@@ -124,7 +139,7 @@ class Motor:
             f"Motor[name={self._name}, in1={self._in1_pin}, in2={self._in2_pin}, "
             f"pwm={self._pwm_pin}, controller={self._controller}]"
         )
-    
+
 
 class AbsHAT(ABC):
     def __init__(self, address=0x60, frequency=1600):
@@ -144,7 +159,7 @@ class AbsHAT(ABC):
 class HATv3(AbsHAT):
     _MOTOR_NUM_TO_PINS: Dict[int, MotorPins] = {
         1: MotorPins(10, 9, 8, MotorDirectionControl.PWM),
-        2: MotorPins(11, 12, 13, MotorDirectionControl.GPIO),
+        2: MotorPins(33, 31, 13, MotorDirectionControl.GPIO),
     }
 
     def get_motor(self, num: int, name: str) -> Motor:
@@ -154,4 +169,6 @@ class HATv3(AbsHAT):
                 f"Possible choices are `{self._MOTOR_NUM_TO_PINS.keys()}`."
             )
         pins = self._MOTOR_NUM_TO_PINS[num]
-        return Motor(name, self._pwm, pins.in1, pins.in2, pins.pwm, control=pins.control)
+        return Motor(
+            name, self._pwm, pins.in1, pins.in2, pins.pwm, control=pins.control
+        )
