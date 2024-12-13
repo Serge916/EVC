@@ -46,7 +46,9 @@ class AbsMotorDirectionController(ABC):
         pass
 
     def __str__(self):
-        return f"{self.__class__.__name__}[in1={self._in1_pin}, in2={self._in2_pin}]"
+        return "{}[in1={}, in2={}]".format(
+            self.__class__.__name__, self._in1_pin, self._in2_pin
+        )
 
 
 class PWMMotorDirectionController(AbsMotorDirectionController):
@@ -136,8 +138,13 @@ class Motor:
 
     def __str__(self):
         return (
-            f"Motor[name={self._name}, in1={self._in1_pin}, in2={self._in2_pin}, "
-            f"pwm={self._pwm_pin}, controller={self._controller}]"
+            "Motor[name={}, in1={}, in2={}, pwm={}, controller={}]".format(
+                self._name,
+                self._in1_pin,
+                self._in2_pin,
+                self._pwm_pin,
+                self._controller,
+            ),
         )
 
 
@@ -165,8 +172,9 @@ class HATv3(AbsHAT):
     def get_motor(self, num: int, name: str) -> Motor:
         if num not in self._MOTOR_NUM_TO_PINS:
             raise ValueError(
-                f"Motor num `{num}` not supported. "
-                f"Possible choices are `{self._MOTOR_NUM_TO_PINS.keys()}`."
+                "Motor num `{}` not supported. Possible choices are `{self._MOTOR_NUM_TO_PINS.keys()}`.".format(
+                    num
+                )
             )
         pins = self._MOTOR_NUM_TO_PINS[num]
         return Motor(
