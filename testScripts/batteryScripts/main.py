@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 
 import serial
 import time
@@ -15,7 +15,7 @@ def shutdown_duckiebattery(serial_port='/dev/ttyACM0', baud_rate=9600):
     try:
         # Open serial connection to the Duckiebattery
         ser = serial.Serial(port=serial_port, baudrate=baud_rate, timeout=1)
-        print(f"Connected to Duckiebattery on {serial_port} at {baud_rate} baud.")
+        print("Connected to Duckiebattery on {} at {} baud.".format(serial_port, baud_rate))
 
         # Send the shutdown command
         ser.write(command)
