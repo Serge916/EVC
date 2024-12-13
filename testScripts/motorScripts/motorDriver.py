@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 
 from math import fabs, floor
 import Jetson.GPIO as GPIO
@@ -22,9 +22,8 @@ class DaguWheelsDriver:
         self.leftSpeed = 0.0
         self.rightSpeed = 0.0
         self._pwm_update()
-    
 
-    def set_wheels_speed(self, left: float, right: float):
+    def set_wheels_speed(self, left, right):
         """Sets speed of motors.
 
         Args:

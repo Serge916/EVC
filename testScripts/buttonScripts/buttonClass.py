@@ -41,7 +41,7 @@ class ButtonDriver:
         GPIO.add_event_detect(self._signal_gpio_pin, GPIO.BOTH, callback=self._cb)
 
     @property
-    def led(self) -> "ButtonLED":
+    def led(self):
         return self._led
 
     def _cb(self, pin):

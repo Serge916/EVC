@@ -3,7 +3,7 @@ import Jetson.GPIO as GPIO
 
 
 class ButtonLED:
-    def __init__(self, gpio_pin: int):
+    def __init__(self, gpio_pin):
         if not 1 <= gpio_pin <= 40:
             raise ValueError("The pin number must be within the range [1, 40].")
         self._gpio_pin = gpio_pin
@@ -22,7 +22,7 @@ class ButtonLED:
             return
         GPIO.output(self._gpio_pin, GPIO.LOW)
 
-    def set(self, value: int):
+    def set(self, value):
         if self._is_shutdown:
             return
         if value not in [0, 1]:
@@ -33,7 +33,7 @@ class ButtonLED:
         # top button LED blinks for 3 seconds
         self.blink_led(secs_to_blink=3, blink_freq_hz=2)
 
-    def blink_led(self, secs_to_blink: int, blink_freq_hz: int):
+    def blink_led(self, secs_to_blink, blink_freq_hz):
         # duration of an off-on or on-off transition
         transition_duration_sec = 1.0 / (2 * blink_freq_hz)
         for _ in range(secs_to_blink):

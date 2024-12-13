@@ -1,8 +1,9 @@
 import smbus
 import time
 
+
 class VL53L0X:
-    def __init__(self, bus=1, address=0x29, sampleTime = 0.005):
+    def __init__(self, bus=1, address=0x29, sampleTime=0.005):
         self.address = address
         self.sampleTime = sampleTime
         self.bus = smbus.SMBus(bus)
@@ -40,7 +41,7 @@ class VL53L0X:
             self.write_byte(0x00, 0x04)
             time.sleep(self.sampleTime)
         except Exception as e:
-            print(f"Initialization error: {e}")
+            print("Initialization error: {}".format(e))
 
     def read_distance(self):
         try:
@@ -51,7 +52,7 @@ class VL53L0X:
             distance = (data[10] << 8) | data[11]
             return distance
         except Exception as e:
-            print(f"Error reading distance: {e}")
+            print("Error reading distance: {}".format(e))
             return None
 
     def write_byte(self, reg, value):

@@ -1,10 +1,7 @@
-from dataclasses import dataclass
-from enum import IntEnum
-from abc import abstractmethod, ABC
-from typing import Dict
-
-from Adafruit_PWM_Servo_Driver import PWM
+from __future__ import print_function
+from abc import ABCMeta, abstractmethod
 import Jetson.GPIO as GPIO
+from Adafruit_PWM_Servo_Driver import PWM
 
 LOW = 0
 HIGH = 1
@@ -12,27 +9,29 @@ PWM_LOW = 0
 PWM_HIGH = 4096
 
 
-class MotorDirection(IntEnum):
+class MotorDirection:
     RELEASE = 0
     FORWARD = 1
     BACKWARD = -1
 
 
-class MotorDirectionControl(IntEnum):
+class MotorDirectionControl:
     PWM = 0
     GPIO = 1
 
 
-@dataclass
 class MotorPins:
-    in1: int
-    in2: int
-    pwm: int
-    control: MotorDirectionControl
+    def __init__(self, in1, in2, pwm, control):
+        self.in1 = in1
+        self.in2 = in2
+        self.pwm = pwm
+        self.control = control
 
 
-class AbsMotorDirectionController(ABC):
-    def __init__(self, in1_pin: int, in2_pin: int, *args, **kwargs):
+class AbsMotorDirectionController:
+    __metaclass__ = ABCMeta
+
+    def __init__(self, in1_pin, in2_pin, *args, **kwargs):
         self._in1_pin = in1_pin
         self._in2_pin = in2_pin
         self.setup()
@@ -42,7 +41,7 @@ class AbsMotorDirectionController(ABC):
         pass
 
     @abstractmethod
-    def set(self, direction: MotorDirection):
+    def set(self, direction):
         pass
 
     def __str__(self):
@@ -63,18 +62,18 @@ class PWMMotorDirectionController(AbsMotorDirectionController):
     }
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(PWMMotorDirectionController, self).__init__(*args, **kwargs)
         if not isinstance(kwargs.get("pwm", None), PWM):
             raise ValueError(
-                "You cannot instantiate `PWMMotorDirectionController` "
-                "without passing a `PWM` object."
+                "You cannot instantiate PWMMotorDirectionController "
+                "without passing a PWM object."
             )
         self._pwm = kwargs["pwm"]
 
     def setup(self):
         pass
 
-    def set(self, direction: MotorDirection):
+    def set(self, direction):
         in1_signal, in2_signal = self._DIRECTION_TO_SIGNALS[direction]
         in1_value, in2_value = (
             self._PWM_VALUES[in1_signal],
@@ -97,7 +96,7 @@ class GPIOMotorDirectionController(AbsMotorDirectionController):
         GPIO.setup(self._in1_pin, GPIO.OUT)
         GPIO.setup(self._in2_pin, GPIO.OUT)
 
-    def set(self, direction: MotorDirection):
+    def set(self, direction):
         in1_signal, in2_signal = self._DIRECTION_TO_SIGNALS[direction]
         in1_value, in2_value = (
             self._GPIO_VALUES[in1_signal],
@@ -116,12 +115,12 @@ class Motor:
 
     def __init__(
         self,
-        name: str,
-        pwm: PWM,
-        in1_pin: int,
-        in2_pin: int,
-        pwm_pin: int,
-        control: MotorDirectionControl,
+        name,
+        pwm,
+        in1_pin,
+        in2_pin,
+        pwm_pin,
+        control,
     ):
         self._pwm = pwm
         self._name = name
@@ -131,24 +130,24 @@ class Motor:
         self._control = control
         self._controller = self._CONTROLLER[control](in1_pin, in2_pin, pwm=self._pwm)
 
-    def set(self, direction: MotorDirection, speed: int = 0):
+    def set(self, direction, speed=0):
         speed = max(0, min(speed, 255))
         self._controller.set(direction)
         self._pwm.setPWM(self._pwm_pin, 0, speed * self._K)
 
     def __str__(self):
-        return (
-            "Motor[name={}, in1={}, in2={}, pwm={}, controller={}]".format(
-                self._name,
-                self._in1_pin,
-                self._in2_pin,
-                self._pwm_pin,
-                self._controller,
-            ),
+        return "Motor[name={}, in1={}, in2={}, pwm={}, controller={}]".format(
+            self._name,
+            self._in1_pin,
+            self._in2_pin,
+            self._pwm_pin,
+            self._controller,
         )
 
 
-class AbsHAT(ABC):
+class AbsHAT:
+    __metaclass__ = ABCMeta
+
     def __init__(self, address=0x60, frequency=1600):
         # default I2C address of the HAT
         self._i2caddr = address
@@ -159,21 +158,21 @@ class AbsHAT(ABC):
         self._pwm.setPWMFreq(self._frequency)
 
     @abstractmethod
-    def get_motor(self, num: int, name: str) -> Motor:
+    def get_motor(self, num, name):
         pass
 
 
 class HATv3(AbsHAT):
-    _MOTOR_NUM_TO_PINS: Dict[int, MotorPins] = {
+    _MOTOR_NUM_TO_PINS = {
         1: MotorPins(10, 9, 8, MotorDirectionControl.PWM),
         2: MotorPins(33, 31, 13, MotorDirectionControl.GPIO),
     }
 
-    def get_motor(self, num: int, name: str) -> Motor:
+    def get_motor(self, num, name):
         if num not in self._MOTOR_NUM_TO_PINS:
             raise ValueError(
-                "Motor num `{}` not supported. Possible choices are `{self._MOTOR_NUM_TO_PINS.keys()}`.".format(
-                    num
+                "Motor num {} not supported. Possible choices are {}.".format(
+                    num, self._MOTOR_NUM_TO_PINS.keys()
                 )
             )
         pins = self._MOTOR_NUM_TO_PINS[num]

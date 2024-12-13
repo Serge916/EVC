@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 
 import time
 from buttonClass import ButtonEvent, ButtonDriver
@@ -8,12 +8,12 @@ SIGNAL_GPIO = 40
 
 
 class button:
-    def __init__(self) -> None:
+    def __init__(self):
         self.driver = ButtonDriver(LED_GPIO, SIGNAL_GPIO, self.event_cb)
         self.ledState = 1
         self.driver.led.set(self.ledState)
 
-    def event_cb(self, event: ButtonEvent):
+    def event_cb(self, event):
         if event == ButtonEvent.PRESS:
             print("Press event")
             return
