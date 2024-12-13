@@ -24,15 +24,15 @@ def shutdown_duckiebattery(serial_port='/dev/ttyACM0', baud_rate=9600):
         # Optional: Read response from Duckiebattery
         response = ser.readline().decode('utf-8').strip()
         if response:
-            print(f"Duckiebattery response: {response}")
+            print("Duckiebattery response: {}".format(response))
 
         # Close the serial connection
         ser.close()
 
     except serial.SerialException as e:
-        print(f"Serial exception occurred: {e}")
+        print("Serial exception occurred: {}".format(e))
     except Exception as e:
-        print(f"An error occurred while sending the shutdown command: {e}")
+        print("An error occurred while sending the shutdown command: {}".format(e))
 
 if __name__ == "__main__":
     # Adjust the serial port and baud rate as needed

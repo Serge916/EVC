@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from math import fabs, floor
-
+import Jetson.GPIO as GPIO
 import hat
 
 
@@ -15,9 +15,9 @@ class DaguWheelsDriver:
     SPEED_TOLERANCE = 1.0e-2  #: Speed tolerance level
 
     def __init__(self):
-        DTHAT = hat.HATv3()
-        self.leftMotor = DTHAT.get_motor(1, "left")
-        self.rightMotor = DTHAT.get_motor(2, "right")
+        self.DTHAT = hat.HATv3()
+        self.leftMotor = self.DTHAT.get_motor(1, "left")
+        self.rightMotor = self.DTHAT.get_motor(2, "right")
         # print out some stats
         self.leftSpeed = 0.0
         self.rightSpeed = 0.0
@@ -80,11 +80,8 @@ class DaguWheelsDriver:
         self.leftMotor.set(leftMotorMode, pwml)
         self.rightMotor.set(rightMotorMode, pwmr)
 
-    def __del__(self):
-        """Destructor method.
-
-        Releases the motors and deletes tho object.
-        """
+    def close(self):
+        """Releases the motors and cleans up resources."""
         self.leftMotor.set(hat.MotorDirection.RELEASE)
         self.rightMotor.set(hat.MotorDirection.RELEASE)
-        del self.hat
+        GPIO.cleanup()
