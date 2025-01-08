@@ -1,2 +1,10 @@
-# batteryScripts
+#Battery
 pyserial
+#Button
+typing
+enum34
+#Display
+Adafruit-SSD1306
+pillow
+#MPU
+mpu6050-raspberrypi
