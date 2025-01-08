@@ -58,7 +58,6 @@ class button:
             return
         if event == ButtonEvent.RELEASE:
             print("Release event")
-            self.ledState ^= 1
             self.driver.led.set(self.ledState)
             releaseTS = time.time()
             print(
