@@ -11,7 +11,7 @@ sudo rosdep init
 rosdep update 
 sudo apt install python-pip 
 pip install --upgrade pip
-pip instal opencv-python==4.2.0.32
+pip install opencv-python==4.2.0.32
 sudo apt install -y i2c-tools python-smbus 
 sudo apt install -y build-essential cmake git pkg-config libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy python2-pip 
 sudo apt-get install gstreamer1.0-tools  
