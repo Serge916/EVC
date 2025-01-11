@@ -3,7 +3,7 @@ Its purpose is to monitor the Button pin and shutdown the board in case of a lon
 
 In case something is not working, please go through the following file:
 
-- etc/systemd/system/shutdown_with_button.service
+- /etc/systemd/system/shutdown_with_button.service
 
 By default it contains the following configuration:
 
@@ -13,12 +13,12 @@ Description=Run Python script to monitor button and shutdown on long press
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python /home/jetbot/watchdog/livenessWatchdog/buttonWatchdog.py
+ExecStart=/usr/bin/python /home/jetbot/watchdog/buttonWatchdog.py
 Restart=on-failure
 RestartSec=5
 User=root
 Group=root
-WorkingDirectory=/home/jetbot/watchdog/livenessWatchdog
+WorkingDirectory=/home/jetbot/watchdog
 StandardOutput=journal
 StandardError=journal
 Environment="PYTHONPATH=/home/jetbot/.local/lib/python2.7/site-packages:/usr/lib/python2.7/site-packages"

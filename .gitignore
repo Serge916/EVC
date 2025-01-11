@@ -2,4 +2,5 @@ catkin_ws/devel
 catkin_ws/build
 
 .histfile
+.vscode
 *.pyc

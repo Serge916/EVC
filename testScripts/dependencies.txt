@@ -4,6 +4,8 @@ pyserial
 typing
 enum34
 #Display
+setuptools==44.1.1
+spidev==3.5
 Adafruit-SSD1306
 pillow
 #MPU
