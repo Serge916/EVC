@@ -17,5 +17,7 @@ sudo apt install -y build-essential cmake git pkg-config libgtk2.0-dev libavcode
 sudo apt-get install gstreamer1.0-tools  
 sudo apt-get install gstreamer1.0-plugins-base  
 sudo apt-get install gstreamer1.0-plugins-good  
-sudo apt-get install gstreamer1.0-plugins-bad 
+sudo apt-get install gstreamer1.0-plugins-bad
+sudo apt-get install libcanberra-gtk-module 
+sudo apt-get install libcanberra-gtk3-module
 python -m pip install -r testScripts/dependencies.txt
