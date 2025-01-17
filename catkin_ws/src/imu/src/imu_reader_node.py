@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-from mpu6050 import MPU6050
+from imuDriver import mpu6050
 import rospy
 from sensor_msgs.msg import Imu
 from std_srvs.srv import Empty, EmptyResponse
@@ -25,6 +25,7 @@ class IMUReaderNode():
         rospy.loginfo("Acceleration Offset: X:%.2f, Y: %.2f, Z: %.2f m/s^2" % tuple(self._accel_offset))
         rospy.loginfo("Gyro Offset X:%.2f, Y: %.2f, Z: %.2f degrees/s" % tuple(self._gyro_offset))
         rospy.loginfo("===============END of IMU Init Val===============")
+        
         # IMU Initialization
         self._sensor = self._find_sensor()
         if not self._sensor:
@@ -32,10 +33,10 @@ class IMUReaderNode():
             exit(1)
         # ---
         rospy.loginfo("===============Performing Initial Testing!===============")
-        accel_dmp = self._sensor.get_acceleration()
-        rospy.loginfo("Acceleration: X: {:.2f}, Y: {:.2f}, Z: {:.2f} m/s^2".format(accel_dmp.x, accel_dmp.y, accel_dmp.z))
-        gyro_data = self._sensor.get_rotation()
-        rospy.loginfo("Gyro X: {:.2f}, Y: {:.2f}, Z: {:.2f} degrees/s".format(gyro_data.x, gyro_data.y, gyro_data.z))
+        accel_dmp = self._sensor.get_accel_data()
+        rospy.loginfo("Acceleration: X: {:.2f}, Y: {:.2f}, Z: {:.2f} m/s^2".format(accel_dmp['x'], accel_dmp['y'], accel_dmp['z']))
+        gyro_data = self._sensor.get_gyro_data()
+        rospy.loginfo("Gyro X: {:.2f}, Y: {:.2f}, Z: {:.2f} degrees/s".format(gyro_data['x'], gyro_data['y'], gyro_data['z']))
         rospy.loginfo("===============IMU Initialization Complete===============")
 
         # ROS Pubsub initialization
@@ -57,12 +58,8 @@ class IMUReaderNode():
 
         # Overwrite Adafruit default device ID
         try:
-            sensor = MPU6050(self._bus, self._address, self._freq_divider)
-            # Initiate your DMP
-            sensor.dmp_initialize()
-            sensor.set_DMP_enabled(True)
+            sensor = mpu6050(self._address, bus=self._bus)
             rospy.loginfo("Device found on connector {}".format(conn))
-
             return sensor
         except Exception:
             rospy.logwarn("No devices found on connector {}, but the bus exists".format(conn))
@@ -77,22 +74,22 @@ class IMUReaderNode():
             msg.header.stamp = rospy.Time.now()
 
             # Get DMP data (acceleration and gyro)
-            acc_data_dmp = self._sensor.get_acceleration()
-            gyro_data = self._sensor.get_rotation()
+            acc_data_dmp = self._sensor.get_accel_data()
+            gyro_data = self._sensor.get_gyro_data()
 
             # Populate the message
             msg.orientation.x = msg.orientation.y = msg.orientation.z = msg.orientation.w = 0
             msg.orientation_covariance = [0.0 for _ in range(len(msg.orientation_covariance))]
             msg.orientation_covariance[0] = -1
 
-            msg.angular_velocity.x = gyro_data.x * 250 / 2**15 - self._gyro_offset.x
-            msg.angular_velocity.y = gyro_data.y * 250 / 2**15 - self._gyro_offset.y
-            msg.angular_velocity.z = gyro_data.z * 250 / 2**15 - self._gyro_offset.z
+            msg.angular_velocity.x = gyro_data['x'] * 250 / 2**15 - self._gyro_offset[0]
+            msg.angular_velocity.y = gyro_data['y'] * 250 / 2**15 - self._gyro_offset[1]
+            msg.angular_velocity.z = gyro_data['z'] * 250 / 2**15 - self._gyro_offset[2]
             msg.angular_velocity_covariance = [0.0 for _ in range(len(msg.angular_velocity_covariance))]
 
-            msg.linear_acceleration.x = acc_data_dmp.x * 2 * self.g / 2**15 - self._accel_offset.x
-            msg.linear_acceleration.y = acc_data_dmp.y * 2 * self.g / 2**15 - self._accel_offset.y
-            msg.linear_acceleration.z = acc_data_dmp.z * 2 * self.g / 2**15 - self._accel_offset.z
+            msg.linear_acceleration.x = acc_data_dmp['x'] * 2 * self.g / 2**15 - self._accel_offset[0]
+            msg.linear_acceleration.y = acc_data_dmp['y'] * 2 * self.g / 2**15 - self._accel_offset[1]
+            msg.linear_acceleration.z = acc_data_dmp['z'] * 2 * self.g / 2**15 - self._accel_offset[2]
             msg.linear_acceleration_covariance = [0.0 for _ in range(len(msg.linear_acceleration_covariance))]
 
             # Publish the message
@@ -106,18 +103,18 @@ class IMUReaderNode():
     def zero_sensor(self):
         rospy.loginfo("zero_sensor service called.")
         # acc_data = self._sensor.get_acceleration()
-        self._accel_offset = self._sensor.get_acceleration()
-        self._accel_offset.x = self._accel_offset.x * 2 * self.g / 2**15
-        self._accel_offset.y = self._accel_offset.y * 2 * self.g / 2**15
-        self._accel_offset.z = self._accel_offset.z * 2 * self.g / 2**15
+        acc_data = self._sensor.get_accel_data()
+        self._accel_offset = [acc_data['x'] * 2 * self.g / 2**15,
+                              acc_data['y'] * 2 * self.g / 2**15,
+                              acc_data['z'] * 2 * self.g / 2**15]
 
-        self._gyro_offset  = self._sensor.get_rotation()
-        self._gyro_offset.x = self._gyro_offset.x * 250 / 2**15
-        self._gyro_offset.y = self._gyro_offset.y * 250 / 2**15
-        self._gyro_offset.z = self._gyro_offset.z * 250 / 2**15
+        gyro_data = self._sensor.get_gyro_data()
+        self._gyro_offset = [gyro_data['x'] * 250 / 2**15,
+                             gyro_data['y'] * 250 / 2**15,
+                             gyro_data['z'] * 250 / 2**15]
 
-        rospy.loginfo("IMU zeroed with ACC: X:{:.2f}, Y: {:.2f}, Z: {:.2f} m/s^2".format(self._accel_offset.x, self._accel_offset.y, self._accel_offset.z))
-        rospy.loginfo("IMU zeroed with Gyro X:{:.2f}, Y: {:.2f}, Z: {:.2f} degrees/s".format(self._gyro_offset.x, self._gyro_offset.y, self._gyro_offset.z))
+        rospy.loginfo("IMU zeroed with ACC: X:{:.2f}, Y: {:.2f}, Z: {:.2f} m/s^2".format(self._accel_offset[0], self._accel_offset[1], self._accel_offset[2]))
+        rospy.loginfo("IMU zeroed with Gyro X:{:.2f}, Y: {:.2f}, Z: {:.2f} degrees/s".format(self._gyro_offset[0], self._gyro_offset[1], self._gyro_offset[2]))
         return None
 
 
@@ -125,3 +122,4 @@ if __name__ == '__main__':
     node = IMUReaderNode(node_name = "imu_node", freq_divider = 8, ang_vel_offset = [0, 0, 0], 
                          accel_offset = [0, 0, 0], i2c_bus = 1, device_address = 0x68)
     rospy.spin()
+
