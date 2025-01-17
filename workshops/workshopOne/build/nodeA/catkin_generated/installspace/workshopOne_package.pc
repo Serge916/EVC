@@ -1,0 +1,8 @@
+prefix=/home/jetbot/workshops/workshopOne/install
+
+Name: workshopOne_package
+Description: Description of workshopOne_package
+Version: 0.1.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

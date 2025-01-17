@@ -1,0 +1,2 @@
+nodeA
+-DCATKIN_DEVEL_PREFIX=/home/jetbot/workshops/workshopOne/devel -DCMAKE_INSTALL_PREFIX=/home/jetbot/workshops/workshopOne/install -G Unix Makefiles
