@@ -1,12 +1,14 @@
 from time import sleep
 from encoderDriver import *
 
-# Encoder 1: GPIO 18
-# Encoder 2: GPIO 19
+GPIO_MOTOR_ENCODER_1=18
+GPIO_MOTOR_ENCODER_2=19
 gpio_pin = 19
 
-driver = WheelEncoderDriver(gpio_pin)
+driver_1 = WheelEncoderDriver(GPIO_MOTOR_ENCODER_1)
+driver_2 = WheelEncoderDriver(GPIO_MOTOR_ENCODER_2)
 
-while 1:
-    print(driver._ticks)
+
+while True:
+    print("Motor Encoder 1: {} \t Motor Encoder 2: {}".format(driver_1._ticks, driver_2._ticks))
     sleep(1)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 
 from enum import IntEnum
 import Jetson.GPIO as GPIO
@@ -34,10 +34,10 @@ class WheelEncoderDriver:
         # wheel direction
         self._direction = WheelDirection.FORWARD
 
-    def get_direction(self) -> WheelDirection:
+    def get_direction(self):
         return self._direction
 
-    def set_direction(self, direction: WheelDirection):
+    def set_direction(self, direction):
         self._direction = direction
 
     def _cb(self, _):
