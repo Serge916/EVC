@@ -1,0 +1,2 @@
+jetson_camera
+-DCATKIN_DEVEL_PREFIX=/home/jetbot/workshops/workshopTwo_Assignment/devel -DCMAKE_INSTALL_PREFIX=/home/jetbot/workshops/workshopTwo_Assignment/install -G Unix Makefiles
