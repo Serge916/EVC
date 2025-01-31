@@ -14,7 +14,7 @@ class CameraPublisherNode:
         rospy.init_node(self.node_name, anonymous=True)
 
         # Publisher for the image topic
-        self.image_pub = rospy.Publisher('/camera/image_raw', Image, queue_size=10)
+        self.image_pub = rospy.Publisher('/camera/image_raw', Image, queue_size=1)
 
         # Create a CvBridge object for converting images
         self.bridge = CvBridge()
