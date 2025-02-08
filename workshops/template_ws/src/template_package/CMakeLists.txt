@@ -21,6 +21,6 @@ install(DIRECTORY launch/
 
 # Install Python scripts
 catkin_install_python(PROGRAMS
-  src/templateNode.py
+  src/template_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

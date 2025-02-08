@@ -2,4 +2,4 @@
 
 # setup ros environment
 source "devel/setup.bash"
-roslaunch template_package templateNode.launch
+roslaunch template_package template_node.launch

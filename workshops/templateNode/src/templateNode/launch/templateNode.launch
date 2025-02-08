@@ -1,4 +1,0 @@
-<launch>
-  <node pkg="template_package" type="templateNode.py" name="templateNode" output="screen">
-  </node>
-</launch>
