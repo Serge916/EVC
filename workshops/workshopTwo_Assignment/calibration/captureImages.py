@@ -2,24 +2,15 @@ import cv2
 import os
 import time
 
-def gstreamer_pipeline(sensor_id=0):
-    flip_method = 0
-    if sensor_id == 0:
-        return ('nvarguscamerasrc sensor-id=0 ! '
-                'video/x-raw(memory:NVMM), format=(string)NV12, framerate=30/1 ! '
-                'nvvidconv flip-method=%d ! '
-                'video/x-raw, format=(string)BGRx ! '
-                'videoconvert ! '
-                'video/x-raw, format=(string)BGR ! appsink' % flip_method)
-    
-    elif sensor_id == 1:
-        return ('v4l2src device=/dev/video1 ! '
-                'video/x-raw, format=(string)YUY2, framerate=30/1 ! '
-                'videoconvert ! '
-                'video/x-raw, format=BGR ! appsink')
-    
-    else:
-        return None
+def gstreamer_pipeline():
+    return ('nvarguscamerasrc sensor-id=0 ! '
+            'video/x-raw(memory:NVMM), format=(string)NV12, framerate=(fraction)1/1 ! '
+            'queue max-size-buffers=1 leaky=downstream ! '
+            'nvvidconv ! video/x-raw, format=(string)I420 ! '
+            'videoconvert ! video/x-raw, format=(string)BGR ! '
+            'queue max-size-buffers=1 leaky=downstream ! '
+            'appsink drop=true sync=false')
+
 
 # Create the folder if it doesn't exist
 save_folder = "frames"
