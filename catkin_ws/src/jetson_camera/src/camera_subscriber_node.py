@@ -2,8 +2,10 @@
 
 import cv2
 import rospy
+import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
+
 
 class CameraSubscriberNode:
     def __init__(self):
@@ -14,10 +16,10 @@ class CameraSubscriberNode:
         # Construct subscriber
         self.sub_image = rospy.Subscriber(
             "/camera/image_raw",
-            Image,
+            CompressedImage,
             self.image_cb,
-            buff_size=10000000,
-            queue_size=1,
+            buff_size=2**24,
+            queue_size=1
         )
 
         self.first_image_received = False
@@ -28,15 +30,17 @@ class CameraSubscriberNode:
         if not self.initialized:
             return
         
-        if self.first_image_received == False:
+        if not self.first_image_received:
             self.first_image_received = True
             rospy.loginfo("Camera subscriber captured first image from publisher.")
         try:
-            # Convert the ROS Image message to an OpenCV image
-            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-            # Display the image
+            # Decode image without CvBridge
+            cv_image = cv2.imdecode(np.frombuffer(data.data, np.uint8), cv2.IMREAD_COLOR)
+            rospy.loginfo("PubSub delay: {}".format((rospy.Time.now() - data.header.stamp).to_sec()))
+
+            # Ensure the window updates instantly
             cv2.imshow("Camera View", cv_image)
-            cv2.waitKey(1)
+            cv2.waitKey(1)  # Keep at 1 to prevent blocking
         except CvBridgeError as err:
             rospy.logerr("Error converting image: {}".format(err))
 

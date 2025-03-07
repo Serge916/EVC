@@ -3,7 +3,8 @@
 import cv2
 import rospy
 from cv_bridge import CvBridge, CvBridgeError
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
+
 
 class CameraPublisherNode:
     def __init__(self, node_name):
@@ -14,7 +15,10 @@ class CameraPublisherNode:
         rospy.init_node(self.node_name, anonymous=True)
 
         # Publisher for the image topic
-        self.image_pub = rospy.Publisher('/camera/image_raw', Image, queue_size=1)
+        self.image_pub = rospy.Publisher(
+            '/camera/image_raw', 
+            CompressedImage,
+            queue_size=1)
 
         # Create a CvBridge object for converting images
         self.bridge = CvBridge()
@@ -64,6 +68,9 @@ class CameraPublisherNode:
 
     def start_publishing(self):
         rate = rospy.Rate(self.fps)
+        msg = CompressedImage()
+        msg.format = "jpeg"
+
         while not rospy.is_shutdown():
             ret, frame = self.cap.read()
             if not ret:
@@ -73,11 +80,13 @@ class CameraPublisherNode:
                 self.first_image_received = True
                 rospy.loginfo("Camera publisher captured first image from physical device.")
             try:
-                # Convert the OpenCV image to a ROS Image message
-                img_msg = self.bridge.cv2_to_imgmsg(frame, "bgr8")
-
-                # Publish the image
-                self.image_pub.publish(img_msg)
+                # Convert the OpenCV image to a ROS CompressedImage message
+                success, encoded_image = cv2.imencode(".jpg", frame)
+                if success:
+                    msg.header.stamp = rospy.Time.now()
+                    msg.data = encoded_image.tobytes()
+                    # Publish the image
+                    self.image_pub.publish(msg)
 
             except CvBridgeError as e:
                 rospy.logerr("Error converting image: {}".format(e))

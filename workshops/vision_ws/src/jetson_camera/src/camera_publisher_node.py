@@ -30,7 +30,6 @@ class CameraPublisherNode:
         self.width = config["width"]
         self.height = config["height"]
         self.fps = config["fps"]
-        self.flip_method = config["flip_method"]
         
         # GStreamer pipeline for the Jetson CSI camera
         self.pipeline = self.gstreamer_pipeline()
@@ -49,23 +48,20 @@ class CameraPublisherNode:
 
     def gstreamer_pipeline(self):
         if self.sensor_id == 0:
-            # Define the GStreamer pipeline for the Jetson camera
             return ('nvarguscamerasrc sensor-id=0 ! '
-                    'video/x-raw(memory:NVMM), '
-                    'width=(int)%d, height=(int)%d, '
+                    'video/x-raw(memory:NVMM), width=(int)%d, height=(int)%d, '
                     'format=(string)NV12, framerate=(fraction)%d/1 ! '
-                    'nvvidconv flip-method=%d ! '
-                    'video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! '
-                    'videoconvert ! '
-                    'video/x-raw, format=(string)BGR ! appsink' % (self.width, self.height, self.fps, 
-                                                                    self.flip_method, self.width, self.height))
+                    'queue max-size-buffers=1 leaky=downstream ! '
+                    'nvvidconv ! video/x-raw, format=(string)I420 ! '
+                    'videoconvert ! video/x-raw, format=(string)BGR ! '
+                    'queue max-size-buffers=1 leaky=downstream ! '
+                    'appsink drop=true sync=false' % (self.width, self.height, self.fps))
+
         elif self.sensor_id == 1:
             return ('v4l2src device=/dev/video1 ! '
-                    'video/x-raw, '
-                    'width=(int)%d, height=(int)%d, '
+                    'video/x-raw, width=(int)%d, height=(int)%d, '
                     'format=(string)YUY2, framerate=(fraction)%d/1 ! '
-                    'videoconvert ! '
-                    'video/x-raw, format=BGR ! '
+                    'videoconvert ! video/x-raw, format=(string)BGR ! '
                     'appsink' % (self.width, self.height, self.fps))
         else:
             return None
@@ -107,7 +103,6 @@ class CameraPublisherNode:
         config["width"] = rospy.get_param("~width")
         config["height"] = rospy.get_param("~height")
         config["fps"] = rospy.get_param("~fps")
-        config["flip_method"] = rospy.get_param("~flip_method")
 
         # Log the loaded configuration
         rospy.loginfo("Loaded config: %s", config)
