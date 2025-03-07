@@ -1,5 +1,5 @@
-catkin_ws/devel
-catkin_ws/build
+devel/
+build/
 
 .histfile
 .vscode

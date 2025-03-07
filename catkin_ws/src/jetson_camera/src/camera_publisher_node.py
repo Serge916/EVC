@@ -26,7 +26,6 @@ class CameraPublisherNode:
         self.width = config["width"]
         self.height = config["height"]
         self.fps = config["fps"]
-        self.flip_method = config["flip_method"]
         
         # GStreamer pipeline for the Jetson CSI camera
         self.pipeline = self.gstreamer_pipeline()
@@ -34,7 +33,7 @@ class CameraPublisherNode:
             rospy.logerr("Pipeline could not be initialized!")
 
         # OpenCV video capture with the GStreamer pipeline
-        self.cap = cv2.VideoCapture(self.pipeline) #, cv2.CAP_GSTREAMER)
+        self.cap = cv2.VideoCapture(self.pipeline, cv2.CAP_GSTREAMER)
 
         if not self.cap.isOpened():
             rospy.logerr("Unable to open camera")
@@ -95,7 +94,6 @@ class CameraPublisherNode:
         config["width"] = rospy.get_param("~width")
         config["height"] = rospy.get_param("~height")
         config["fps"] = rospy.get_param("~fps")
-        config["flip_method"] = rospy.get_param("~flip_method")
 
         # Log the loaded configuration
         rospy.loginfo("Loaded config: %s", config)
